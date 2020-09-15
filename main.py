@@ -126,4 +126,4 @@ if __name__ == '__main__':
     thread.start()
     GLib.MainLoop().run()
   else:
-    raise ValueError('No GitHub auth token present')
+    raise ValueError('`GITHUB_AUTH_TOKEN` is missing in env')
