@@ -37,9 +37,9 @@ def format_api_url_to_browser_url(url, type):
   else:
     return browser_url
 
-class github_notify_daemon:
+class notification_daemon:
   def __init__(self):
-    self.notification_store = {}
+    self.store = {}
     self.seen_ids = []
 
   def start(self):
@@ -53,22 +53,27 @@ class github_notify_daemon:
         print(e)
       time.sleep(30)
 
-  def open_in_browser(self, _, __, n):
-    self.notification_store.pop(n['id'], None)
+  def dismiss(self, notification):
+    self.store.pop(str(notification.id), None)
+
+  def open_in_browser(self, notification, name, n):
+    self.dismiss(notification)
     subject = n['subject']
     url = format_api_url_to_browser_url(subject['url'], subject['type'])
     webbrowser.open(url)
 
-  def notify(self, notifications):
+  def notify(self, all_notifications):
+    def is_target(n):
+      is_new = n['id'] not in self.seen_ids
+      is_primary = n['subject']['type'] not in ['Commit', 'RepositoryVulnerabilityAlert']
+      return is_new and is_primary
+
+    notifications = [n for n in all_notifications if is_target(n)]
+
     for n in notifications:
       id = n['id']
       subject = n['subject']
-      type = subject['type']
 
-      if id in self.seen_ids or type in ['Commit', 'RepositoryVulnerabilityAlert']:
-        continue
-
-      self.seen_ids.append(id)
       reason = n['reason']
       repo_name = n['repository']['full_name']
 
@@ -77,18 +82,24 @@ class github_notify_daemon:
         subject['title']
       )
 
+      notification.set_urgency(0)
+      notification.id = int(id)
+
       notification.add_action(
         'default',
         'Open GitHub',
         self.open_in_browser,
-        n
+        { 'subject': subject }
       )
 
+      notification.connect('closed', self.dismiss)
       notification.show()
-      self.notification_store[n['id']] = notification
+
+      self.seen_ids.append(id)
+      self.store[id] = notification
 
 def app_main():
-  daemon = github_notify_daemon()
+  daemon = notification_daemon()
   daemon.start()
 
 if __name__ == '__main__':
