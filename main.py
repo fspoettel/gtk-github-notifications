@@ -9,7 +9,6 @@ import threading
 import time
 import webbrowser
 
-
 import gi
 gi.require_version('Notify', '0.7')
 from gi.repository import Notify
@@ -50,7 +49,6 @@ class notification_daemon:
 
   def start(self):
     Notify.init('GitHub')
-
     while True:
       try:
         notifications = github_request('notifications', { 'per_page': 100 })
@@ -66,7 +64,6 @@ class notification_daemon:
       return is_new and is_primary
 
     notifications = [n for n in all_notifications if is_target(n)]
-
     count = len(notifications)
     if count < 3:
       for n in notifications:
