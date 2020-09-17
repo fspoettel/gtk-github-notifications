@@ -5,7 +5,8 @@
 ### Install & Usage
 
  1. Get a personal access token with `notifications` scope and store it as an env variable `GITHUB_AUTH_TOKEN`
- 2. Run `./main.py`
+ 2. Follow [install instructions]( https://pygobject.readthedocs.io/en/latest/getting_started.html#ubuntu-logo-ubuntu-debian-logo-debian) for `PyGObject`
+ 3. Run `./main.py`
 
 ### Notifications
 
